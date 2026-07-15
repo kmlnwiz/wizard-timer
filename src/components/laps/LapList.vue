@@ -60,11 +60,11 @@ function onTrueDelete(): void {
 </script>
 
 <template>
-  <div>
+  <div class="flex flex-col">
     <p v-if="laps.length === 0" class="py-6 text-center text-sm text-gray-400 dark:text-gray-500">
       まだラップがありません
     </p>
-    <div v-else class="max-h-80 overflow-y-auto">
+    <div v-else class="max-h-80 overflow-y-auto md:max-h-none md:min-h-0 md:flex-1">
       <LapListItem
         v-for="entry in displayedLaps"
         :key="entry.lap.id"

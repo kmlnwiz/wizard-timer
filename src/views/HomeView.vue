@@ -25,8 +25,8 @@ const settingsOpen = ref(false)
 </script>
 
 <template>
-  <div class="min-h-screen bg-white dark:bg-gray-900">
-    <AppHeader @open-settings="settingsOpen = true" />
+  <div class="flex min-h-screen flex-col bg-white dark:bg-gray-900 md:h-[100dvh] md:min-h-0 md:overflow-hidden">
+    <AppHeader class="shrink-0" @open-settings="settingsOpen = true" />
 
     <AppLayout>
       <template #primary>
@@ -43,7 +43,7 @@ const settingsOpen = ref(false)
 
         <ClockPanel />
 
-        <LapList />
+        <LapList class="md:min-h-0 md:flex-1" />
       </template>
 
       <template #secondary>
