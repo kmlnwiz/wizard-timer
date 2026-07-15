@@ -1,5 +1,7 @@
 <template>
-  <div class="mx-auto w-full max-w-[1194px] px-4 pb-8 md:grid md:grid-cols-2 md:gap-6">
+  <div
+    class="mx-auto w-full max-w-[1194px] px-4 pb-8 pt-4 md:grid md:grid-cols-2 md:gap-6"
+  >
     <div class="space-y-4 md:col-span-1">
       <slot name="primary" />
     </div>
