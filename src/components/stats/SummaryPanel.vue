@@ -19,6 +19,14 @@ function formatLapCount(v: number | null): string {
   return v !== null ? `(${Math.floor(v)}周)` : ''
 }
 
+/** 理論周回数を「N周とX秒」で表す。端数は最速ラップ換算の残り時間(秒)。 */
+function formatTheoreticalLapCount(count: number | null, fastestLapMs: number | null): string {
+  if (count === null || fastestLapMs === null) return ''
+  const laps = Math.floor(count)
+  const remainderSec = Math.round(((count - laps) * fastestLapMs) / 1000)
+  return `(${laps}周と${remainderSec}秒)`
+}
+
 async function saveAsImage(): Promise<void> {
   if (!captureEl.value || isSaving.value) return
   isSaving.value = true
@@ -83,6 +91,15 @@ async function saveAsImage(): Promise<void> {
             <TabularDigits :text="formatPoints(summary.avgPointsPerHour)" />
             <span class="block text-xs font-normal text-gray-400 dark:text-gray-500">{{
               formatLapCount(summary.avgPointsPerHourLapCount)
+            }}</span>
+          </dd>
+        </div>
+        <div>
+          <dt class="text-xs text-gray-400 dark:text-gray-500">理論時速</dt>
+          <dd class="whitespace-nowrap text-base font-bold text-amber-600 dark:text-amber-400">
+            <TabularDigits :text="formatPoints(summary.theoreticalPointsPerHour)" />
+            <span class="block text-xs font-normal text-gray-400 dark:text-gray-500">{{
+              formatTheoreticalLapCount(summary.theoreticalLapCount, summary.fastestLapMs)
             }}</span>
           </dd>
         </div>
