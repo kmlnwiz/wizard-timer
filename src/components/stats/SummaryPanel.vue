@@ -4,7 +4,7 @@ import BaseButton from '@/components/ui/BaseButton.vue'
 import TabularDigits from '@/components/ui/TabularDigits.vue'
 import SummaryChart from './SummaryChart.vue'
 import { useSummary } from '@/composables/useSummary'
-import { formatDurationDHMS, formatLapDuration, formatFileTimestamp } from '@/utils/time'
+import { formatHours, formatLapDuration, formatFileTimestamp } from '@/utils/time'
 
 const { summary, hourlyLapCounts } = useSummary()
 
@@ -47,11 +47,11 @@ async function saveAsImage(): Promise<void> {
     </div>
 
     <div ref="captureEl" class="space-y-4 py-2">
-      <dl class="grid grid-cols-3 gap-3 text-center">
+      <dl class="grid grid-cols-2 gap-3 text-center sm:grid-cols-3">
         <div>
           <dt class="text-xs text-gray-400 dark:text-gray-500">合計時間</dt>
           <dd class="text-base font-bold text-gray-900 dark:text-gray-100">
-            <TabularDigits :text="formatDurationDHMS(summary.totalElapsedMs)" />
+            <TabularDigits :text="formatHours(summary.totalElapsedMs)" />
           </dd>
         </div>
         <div>
@@ -72,7 +72,7 @@ async function saveAsImage(): Promise<void> {
           <dt class="text-xs text-gray-400 dark:text-gray-500">最高時速</dt>
           <dd class="whitespace-nowrap text-base font-bold text-emerald-600 dark:text-emerald-400">
             <TabularDigits :text="formatPoints(summary.maxPointsPerHour)" />
-            <span class="text-sm font-normal text-gray-400 dark:text-gray-500">{{
+            <span class="block text-xs font-normal text-gray-400 dark:text-gray-500">{{
               formatLapCount(summary.maxPointsPerHourLapCount)
             }}</span>
           </dd>
@@ -81,7 +81,7 @@ async function saveAsImage(): Promise<void> {
           <dt class="text-xs text-gray-400 dark:text-gray-500">平均時速</dt>
           <dd class="whitespace-nowrap text-base font-bold text-indigo-600 dark:text-indigo-400">
             <TabularDigits :text="formatPoints(summary.avgPointsPerHour)" />
-            <span class="text-sm font-normal text-gray-400 dark:text-gray-500">{{
+            <span class="block text-xs font-normal text-gray-400 dark:text-gray-500">{{
               formatLapCount(summary.avgPointsPerHourLapCount)
             }}</span>
           </dd>

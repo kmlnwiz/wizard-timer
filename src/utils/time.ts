@@ -27,6 +27,11 @@ export function formatLapDuration(ms: number): string {
   return `${minutes}:${pad(seconds)}.${pad(centiSeconds)}`
 }
 
+/** ms を「N.N時間」形式(ラップ合計時間の表示用)に整形する */
+export function formatHours(ms: number): string {
+  return `${(ms / (60 * 60 * 1000)).toFixed(1)}時間`
+}
+
 /** ms を D日 HH:MM:SS 形式(カウントダウン表示用)に整形する */
 export function formatDurationDHMS(ms: number): string {
   const totalSeconds = Math.floor(ms / 1000)

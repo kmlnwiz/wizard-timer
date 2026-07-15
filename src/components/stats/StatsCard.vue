@@ -48,24 +48,24 @@ function formatLapCount(v: number | null): string {
         </div>
       </div>
     </div>
-    <div v-if="stats.maxPointsPerHour !== null" class="mt-1 flex justify-around text-center">
-      <div>
-        <p class="text-[11px] text-gray-400 dark:text-gray-500">最高時速</p>
-        <p class="whitespace-nowrap font-semibold text-emerald-600 dark:text-emerald-400">
+    <div v-if="stats.maxPointsPerHour !== null" class="mt-1 space-y-0.5">
+      <div class="flex items-baseline justify-between gap-2">
+        <span class="shrink-0 text-[11px] text-gray-400 dark:text-gray-500">最高時速</span>
+        <span class="whitespace-nowrap text-sm font-semibold text-emerald-600 dark:text-emerald-400">
           <TabularDigits :text="formatPoints(stats.maxPointsPerHour)" />
           <span class="text-xs font-normal text-gray-400 dark:text-gray-500">{{
             formatLapCount(stats.maxPointsPerHourLapCount)
           }}</span>
-        </p>
+        </span>
       </div>
-      <div>
-        <p class="text-[11px] text-gray-400 dark:text-gray-500">平均時速</p>
-        <p class="whitespace-nowrap font-semibold text-indigo-600 dark:text-indigo-400">
+      <div class="flex items-baseline justify-between gap-2">
+        <span class="shrink-0 text-[11px] text-gray-400 dark:text-gray-500">平均時速</span>
+        <span class="whitespace-nowrap text-sm font-semibold text-indigo-600 dark:text-indigo-400">
           <TabularDigits :text="formatPoints(stats.avgPointsPerHour)" />
           <span class="text-xs font-normal text-gray-400 dark:text-gray-500">{{
             formatLapCount(stats.avgPointsPerHourLapCount)
           }}</span>
-        </p>
+        </span>
       </div>
     </div>
   </div>
