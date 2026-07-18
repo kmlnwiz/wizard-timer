@@ -8,6 +8,7 @@ export const STATS_LABELS = {
   fastestLap: '最速ラップ',
   slowestLap: '最遅ラップ',
   avgHourly: '平均時速',
+  hourly: '時速',
   maxHourly: '最高時速',
   theoreticalHourly: '理論時速',
 } as const

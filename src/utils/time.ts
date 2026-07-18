@@ -47,7 +47,7 @@ export function formatDurationDHMS(ms: number): string {
   return days > 0 ? `${days}日 ${hms}` : hms
 }
 
-/** ms を HHH:MM:SS.cc 形式(3桁時間・1/100秒まで)に整形する */
+/** ms を HH:MM:SS.cc 形式(2桁時間・1/100秒まで)に整形する */
 export function formatDurationHHHMMSScc(ms: number): string {
   const totalCentiSeconds = Math.floor(ms / 10)
   const centiSeconds = totalCentiSeconds % 100
@@ -58,7 +58,7 @@ export function formatDurationHHHMMSScc(ms: number): string {
   const hours = Math.floor(totalMinutes / 60)
 
   const pad = (n: number) => String(n).padStart(2, '0')
-  return `${String(hours).padStart(3, '0')}:${pad(minutes)}:${pad(seconds)}.${pad(centiSeconds)}`
+  return `${String(hours).padStart(2, '0')}:${pad(minutes)}:${pad(seconds)}.${pad(centiSeconds)}`
 }
 
 interface JstParts {

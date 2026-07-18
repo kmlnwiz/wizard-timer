@@ -1,5 +1,7 @@
 export interface StatsResult {
   rangeLabel: string
+  /** 最高時速の列を表示するか。期間別カード(直近/前)ではfalse */
+  showMaxHourly: boolean
   averageLapMs: number | null
   fastestLapMs: number | null
   slowestLapMs: number | null

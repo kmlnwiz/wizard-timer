@@ -40,7 +40,9 @@ const periodLabel = computed(() => {
         </p>
       </div>
       <div class="flex-1">
-        <p class="text-[11px] text-gray-500 dark:text-gray-400">{{ STATS_LABELS.avgHourly }}</p>
+        <p class="text-[11px] text-gray-500 dark:text-gray-400">
+          {{ stats.showMaxHourly ? STATS_LABELS.avgHourly : STATS_LABELS.hourly }}
+        </p>
         <p class="font-semibold" :class="STATS_COLORS.neutral">
           <TabularDigits :text="formatHourlySpeed(stats.avgPointsPerHour, stats.avgPointsPerHourLapCount, 1)" />
           <span class="text-[10px] font-normal text-gray-500 dark:text-gray-400">{{
@@ -48,7 +50,7 @@ const periodLabel = computed(() => {
           }}</span>
         </p>
       </div>
-      <div class="flex-1">
+      <div v-if="stats.showMaxHourly" class="flex-1">
         <p class="text-[11px] text-gray-500 dark:text-gray-400">{{ STATS_LABELS.maxHourly }}</p>
         <p class="font-semibold" :class="STATS_COLORS.maxHourly">
           <TabularDigits :text="formatHourlySpeed(stats.maxPointsPerHour, stats.maxPointsPerHourLapCount)" />
