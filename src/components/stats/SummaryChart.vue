@@ -12,6 +12,10 @@ import {
   Tooltip,
 } from 'chart.js'
 import type { HourlyLapCount } from '@/composables/useSummary'
+import { useSettings } from '@/composables/useSettings'
+import { formatHourlySpeed } from '@/utils/statsDisplay'
+
+const { settings } = useSettings()
 
 Chart.register(
   BarController,
@@ -78,6 +82,18 @@ function buildChart(): void {
       },
       plugins: {
         legend: { display: true, position: 'bottom' },
+        tooltip: {
+          callbacks: {
+            // 周回数の項目に「時速」を併記する(周回数=その枠の時速)
+            afterLabel: (ctx) => {
+              if (ctx.dataset.label !== '周回数') return undefined
+              const count = props.series[ctx.dataIndex]?.count ?? 0
+              const pointsPerLap = settings.value.pointsPerLap
+              const points = pointsPerLap > 0 ? Math.floor(count) * pointsPerLap : null
+              return `時速: ${formatHourlySpeed(points, count)}`
+            },
+          },
+        },
       },
     },
   })

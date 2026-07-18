@@ -7,12 +7,16 @@ const HOUR_MS = 60 * 60 * 1000
 
 export interface SummaryResult {
   totalElapsedMs: number
+  /** 記録した総ラップ数 */
+  totalLapCount: number
   averageLapMs: number | null
   fastestLapMs: number | null
   slowestLapMs: number | null
   /** 各時間枠の実測周回数(切り捨て) × ポイント の最大値。ポイント未設定ならnull */
   maxPointsPerHour: number | null
   maxPointsPerHourLapCount: number | null
+  /** 最高時速を記録した枠の数(記録回数)。ラップが無ければnull */
+  maxPointsPerHourRecordCount: number | null
   /** 各時間枠の実測周回数(切り捨て) × ポイント の平均値。ポイント未設定ならnull */
   avgPointsPerHour: number | null
   avgPointsPerHourLapCount: number | null
@@ -45,11 +49,13 @@ export function useSummary() {
     if (laps.value.length === 0) {
       return {
         totalElapsedMs,
+        totalLapCount: 0,
         averageLapMs: null,
         fastestLapMs: null,
         slowestLapMs: null,
         maxPointsPerHour: null,
         maxPointsPerHourLapCount: null,
+        maxPointsPerHourRecordCount: null,
         avgPointsPerHour: null,
         avgPointsPerHourLapCount: null,
         theoreticalLapCount: null,
@@ -57,10 +63,16 @@ export function useSummary() {
       }
     }
 
-    const durations = laps.value.map((l) => l.lapDurationMs)
-    const averageLapMs = durations.reduce((sum, d) => sum + d, 0) / durations.length
-    const fastestLapMs = Math.min(...durations)
-    const slowestLapMs = Math.max(...durations)
+    // 大配列でのスプレッド(Math.min(...))を避け、1回の走査で平均・最速・最遅を求める
+    let sum = 0
+    let fastestLapMs = Infinity
+    let slowestLapMs = -Infinity
+    for (const l of laps.value) {
+      sum += l.lapDurationMs
+      if (l.lapDurationMs < fastestLapMs) fastestLapMs = l.lapDurationMs
+      if (l.lapDurationMs > slowestLapMs) slowestLapMs = l.lapDurationMs
+    }
+    const averageLapMs = sum / laps.value.length
 
     const pointsStats = computePointsPerHourStats(lapSlots.value, null, null, settings.value.pointsPerLap)
 
@@ -71,11 +83,13 @@ export function useSummary() {
 
     return {
       totalElapsedMs,
+      totalLapCount: laps.value.length,
       averageLapMs,
       fastestLapMs,
       slowestLapMs,
       maxPointsPerHour: pointsStats.maxPoints,
       maxPointsPerHourLapCount: pointsStats.maxLapCount,
+      maxPointsPerHourRecordCount: pointsStats.maxRecordCount,
       avgPointsPerHour: pointsStats.avgPoints,
       avgPointsPerHourLapCount: pointsStats.avgLapCount,
       theoreticalLapCount,

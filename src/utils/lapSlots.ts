@@ -50,13 +50,16 @@ export function computeLapSlotCounts(laps: readonly LapRecord[], now: number = D
 export interface PointsPerHourStats {
   maxPoints: number | null
   maxLapCount: number | null
+  /** 最高周回数を記録した枠の数(=最高時速の記録回数) */
+  maxRecordCount: number | null
   avgPoints: number | null
   avgLapCount: number | null
 }
 
 /**
- * 実測枠(1枠=1時間相当)ごとの「周回数(切り捨て)×ポイント」から、
- * 期間内での最高値・平均値(件数付き)を算出する。
+ * 実測枠(1枠=1時間相当)ごとの「周回数(=時速)」から、期間内での最高値・平均値を算出する。
+ * 周回数は常に返し、ポイント換算値(周回数×ポイント)はポイント設定時のみ返す。
+ * 周回数とポイントは比例するため、最高枠は周回数で選んでポイントに換算する。
  */
 export function computePointsPerHourStats(
   slots: readonly LapSlotCount[],
@@ -64,20 +67,25 @@ export function computePointsPerHourStats(
   periodEndMs: number | null,
   pointsPerLap: number,
 ): PointsPerHourStats {
-  if (pointsPerLap <= 0) return { maxPoints: null, maxLapCount: null, avgPoints: null, avgLapCount: null }
-
   const relevant = (
     periodStartMs === null
       ? slots
       : slots.filter((s) => s.startMs >= periodStartMs && s.startMs < (periodEndMs ?? Infinity))
   ).filter((s) => s.count > 0)
 
-  if (relevant.length === 0) return { maxPoints: null, maxLapCount: null, avgPoints: null, avgLapCount: null }
+  if (relevant.length === 0)
+    return { maxPoints: null, maxLapCount: null, maxRecordCount: null, avgPoints: null, avgLapCount: null }
 
-  const withPoints = relevant.map((s) => ({ lapCount: s.count, points: Math.floor(s.count) * pointsPerLap }))
-  const maxEntry = withPoints.reduce((a, b) => (b.points > a.points ? b : a))
-  const avgPoints = withPoints.reduce((sum, s) => sum + s.points, 0) / withPoints.length
-  const avgLapCount = withPoints.reduce((sum, s) => sum + s.lapCount, 0) / withPoints.length
+  const maxLapCount = relevant.reduce((max, s) => (s.count > max ? s.count : max), relevant[0].count)
+  const maxRecordCount = relevant.filter((s) => s.count === maxLapCount).length
+  const avgLapCount = relevant.reduce((sum, s) => sum + s.count, 0) / relevant.length
+  const hasPoints = pointsPerLap > 0
 
-  return { maxPoints: maxEntry.points, maxLapCount: maxEntry.lapCount, avgPoints, avgLapCount }
+  return {
+    maxPoints: hasPoints ? Math.floor(maxLapCount) * pointsPerLap : null,
+    maxLapCount,
+    maxRecordCount,
+    avgPoints: hasPoints ? avgLapCount * pointsPerLap : null,
+    avgLapCount,
+  }
 }

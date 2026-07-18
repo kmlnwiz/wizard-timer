@@ -8,7 +8,7 @@ const { statsList } = useStats();
 <template>
   <div>
     <h2 class="mb-1 text-base font-bold text-gray-900 dark:text-gray-100">
-      ラップ　統計
+      ラップ統計
     </h2>
     <div>
       <StatsCard v-for="s in statsList" :key="s.rangeLabel" :stats="s" />

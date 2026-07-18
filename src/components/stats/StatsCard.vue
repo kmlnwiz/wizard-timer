@@ -1,8 +1,16 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { StatsResult } from '@/types/stats'
-import { formatLapDuration, formatJstHm } from '@/utils/time'
+import { formatJstHm } from '@/utils/time'
 import TabularDigits from '@/components/ui/TabularDigits.vue'
+import {
+  STATS_LABELS,
+  STATS_COLORS,
+  formatLapTime,
+  formatHourlySpeed,
+  formatAvgHourlySub,
+  formatMaxHourlySub,
+} from '@/utils/statsDisplay'
 
 const props = defineProps<{ stats: StatsResult }>()
 
@@ -10,62 +18,44 @@ const periodLabel = computed(() => {
   if (props.stats.periodStartMs === null || props.stats.periodEndMs === null) return null
   return `${formatJstHm(new Date(props.stats.periodStartMs))}〜${formatJstHm(new Date(props.stats.periodEndMs))}`
 })
-
-function formatPoints(v: number | null): string {
-  return v !== null ? `${Math.round(v).toLocaleString()}pt/h` : '--'
-}
-
-function formatLapCount(v: number | null): string {
-  return v !== null ? `(${Math.floor(v)}周)` : ''
-}
 </script>
 
 <template>
-  <div class="border-b border-gray-100 py-2 text-sm dark:border-gray-800">
-    <div class="flex items-center justify-between">
-      <span class="w-20 shrink-0 text-gray-500 dark:text-gray-400">
-        {{ stats.rangeLabel }}
-        <span v-if="periodLabel" class="block text-[11px] text-gray-400 dark:text-gray-500">{{ periodLabel }}</span>
-      </span>
-      <div class="flex flex-1 justify-around text-center">
-        <div>
-          <p class="text-[11px] text-gray-400 dark:text-gray-500">平均</p>
-          <p class="font-semibold text-gray-900 dark:text-gray-100">
-            <TabularDigits :text="stats.averageLapMs !== null ? formatLapDuration(stats.averageLapMs) : '--:--.--'" />
-          </p>
-        </div>
-        <div>
-          <p class="text-[11px] text-gray-400 dark:text-gray-500">最速</p>
-          <p class="font-semibold text-emerald-600 dark:text-emerald-400">
-            <TabularDigits :text="stats.fastestLapMs !== null ? formatLapDuration(stats.fastestLapMs) : '--:--.--'" />
-          </p>
-        </div>
-        <div>
-          <p class="text-[11px] text-gray-400 dark:text-gray-500">最遅</p>
-          <p class="font-semibold text-red-600 dark:text-red-400">
-            <TabularDigits :text="stats.slowestLapMs !== null ? formatLapDuration(stats.slowestLapMs) : '--:--.--'" />
-          </p>
-        </div>
-      </div>
+  <div class="border-b border-gray-100 py-1 text-sm dark:border-gray-800">
+    <div class="mb-1 text-gray-500 dark:text-gray-400">
+      {{ stats.rangeLabel }}
+      <span v-if="periodLabel" class="text-[11px] text-gray-500 dark:text-gray-400">{{ periodLabel }}</span>
     </div>
-    <div v-if="stats.maxPointsPerHour !== null" class="mt-1 space-y-0.5">
-      <div class="flex items-baseline justify-between gap-2">
-        <span class="shrink-0 text-[11px] text-gray-400 dark:text-gray-500">最高時速</span>
-        <span class="whitespace-nowrap text-sm font-semibold text-emerald-600 dark:text-emerald-400">
-          <TabularDigits :text="formatPoints(stats.maxPointsPerHour)" />
-          <span class="text-xs font-normal text-gray-400 dark:text-gray-500">{{
-            formatLapCount(stats.maxPointsPerHourLapCount)
-          }}</span>
-        </span>
+    <div class="flex items-start justify-between gap-1 text-center">
+      <div class="flex-1">
+        <p class="text-[11px] text-gray-500 dark:text-gray-400">{{ STATS_LABELS.averageLap }}</p>
+        <p class="font-semibold" :class="STATS_COLORS.neutral">
+          <TabularDigits :text="formatLapTime(stats.averageLapMs)" />
+        </p>
       </div>
-      <div class="flex items-baseline justify-between gap-2">
-        <span class="shrink-0 text-[11px] text-gray-400 dark:text-gray-500">平均時速</span>
-        <span class="whitespace-nowrap text-sm font-semibold text-indigo-600 dark:text-indigo-400">
-          <TabularDigits :text="formatPoints(stats.avgPointsPerHour)" />
-          <span class="text-xs font-normal text-gray-400 dark:text-gray-500">{{
-            formatLapCount(stats.avgPointsPerHourLapCount)
+      <div class="flex-1">
+        <p class="text-[11px] text-gray-500 dark:text-gray-400">{{ STATS_LABELS.fastestLap }}</p>
+        <p class="font-semibold" :class="STATS_COLORS.fastest">
+          <TabularDigits :text="formatLapTime(stats.fastestLapMs)" />
+        </p>
+      </div>
+      <div class="flex-1">
+        <p class="text-[11px] text-gray-500 dark:text-gray-400">{{ STATS_LABELS.avgHourly }}</p>
+        <p class="font-semibold" :class="STATS_COLORS.neutral">
+          <TabularDigits :text="formatHourlySpeed(stats.avgPointsPerHour, stats.avgPointsPerHourLapCount, 1)" />
+          <span class="text-[10px] font-normal text-gray-500 dark:text-gray-400">{{
+            formatAvgHourlySub(stats.avgPointsPerHour, stats.avgPointsPerHourLapCount)
           }}</span>
-        </span>
+        </p>
+      </div>
+      <div class="flex-1">
+        <p class="text-[11px] text-gray-500 dark:text-gray-400">{{ STATS_LABELS.maxHourly }}</p>
+        <p class="font-semibold" :class="STATS_COLORS.maxHourly">
+          <TabularDigits :text="formatHourlySpeed(stats.maxPointsPerHour, stats.maxPointsPerHourLapCount)" />
+          <span class="text-[10px] font-normal text-gray-500 dark:text-gray-400">{{
+            formatMaxHourlySub(stats.maxPointsPerHour, stats.maxPointsPerHourLapCount)
+          }}</span>
+        </p>
       </div>
     </div>
   </div>

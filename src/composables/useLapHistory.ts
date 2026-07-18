@@ -25,7 +25,12 @@ export function useLapHistory() {
    */
   function addLap(elapsedMs: number): LapRecord {
     const previous = laps.value[laps.value.length - 1]
-    const lapDurationMs = previous ? elapsedMs - previous.elapsedMs : elapsedMs
+    // 差分は同一セッション内の直前ラップに対してのみ計算する。
+    // セッションをまたぐと(0秒から開始した直後など)過去セッションの大きな
+    // elapsedMs との差分でマイナスになるため、新セッションの初回ラップは
+    // elapsedMs をそのまま採用する。
+    const sameSession = previous?.sessionId === currentSessionId.value
+    const lapDurationMs = sameSession ? elapsedMs - previous.elapsedMs : elapsedMs
 
     const record: LapRecord = {
       id: crypto.randomUUID(),
@@ -102,6 +107,11 @@ export function useLapHistory() {
     currentSessionId.value = createSessionId()
   }
 
+  /** 履歴は残したまま新しい計測セッションを開始する(0秒から開始したときなど) */
+  function startNewSession(): void {
+    currentSessionId.value = createSessionId()
+  }
+
   /**
    * 開発確認用にダミーのラップ履歴を生成して読み込む(ローカル専用)。
    * 実際の「今」がイベント期間外(平日)でも72区分の実測グラフに正しく乗るよう、
@@ -113,13 +123,32 @@ export function useLapHistory() {
     const eventStart = getMostRecentFriday16(new Date())
     const endTimestamp = eventStart + 72 * 60 * 60 * 1000
 
+    // 72時間内に240分(=4時間)前後±30分の空白期間を3つ設ける(休憩・離席のシミュレーション)。
+    // 開始直後・終了間際を避けたランダムな時刻から、その長さ分ラップ生成をスキップする。
+    const marginMs = 6 * 60 * 60 * 1000
+    const gaps = Array.from({ length: 3 }, () => {
+      const durationMs = (240 + (Math.random() * 60 - 30)) * 60 * 1000
+      const start = eventStart + marginMs + Math.random() * (72 * 60 * 60 * 1000 - durationMs - marginMs * 2)
+      return { start, end: start + durationMs }
+    })
+    const isInGap = (t: number): boolean => gaps.some((g) => t >= g.start && t < g.end)
+
     const generated: LapRecord[] = []
     let timestamp = eventStart
     let elapsedMs = 0
     while (timestamp < endTimestamp) {
-      const lapDurationMs = Math.round((20 + Math.random() * 70) * 1000)
+      // 2:02(122秒)前後±7秒のラップタイムを生成する
+      let durationSec = 122 + (Math.random() * 14 - 7)
+      // 8%の確率で+30〜75秒のロスを加える(トラブル・ミスのシミュレーション)
+      if (Math.random() < 0.08) durationSec += 30 + Math.random() * 45
+      const lapDurationMs = Math.round(durationSec * 1000)
+
       elapsedMs += lapDurationMs
       timestamp += lapDurationMs
+
+      // 空白期間内のラップは記録しない(elapsedMs/timestampは進めて連続性を保つ)
+      if (isInGap(timestamp)) continue
+
       generated.push({
         id: crypto.randomUUID(),
         timestamp,
@@ -140,6 +169,7 @@ export function useLapHistory() {
     deleteLap,
     deleteLapCompletely,
     reset,
+    startNewSession,
     loadTestData,
   }
 }

@@ -21,12 +21,12 @@ const durationClass = computed(() => {
 </script>
 
 <template>
-  <div class="flex items-center justify-between gap-1.5 border-b border-gray-100 py-2 dark:border-gray-800 sm:gap-2">
-    <span class="truncate text-xs text-gray-400 dark:text-gray-500 sm:text-sm">ラップ{{ index + 1 }}</span>
+  <div class="flex items-center justify-between gap-1.5 border-b border-gray-200 py-1 dark:border-gray-800 sm:gap-2">
+    <span class="truncate text-xs text-gray-700 dark:text-gray-400 sm:text-sm">ラップ{{ index + 1 }}</span>
     <div class="flex shrink-0 items-center gap-1.5 sm:gap-2">
       <div class="flex flex-col items-end sm:flex-row sm:items-center sm:gap-2">
         <span class="order-2 text-[10px] text-gray-400 dark:text-gray-500 sm:order-1 sm:text-xs">
-          <TabularDigits :text="formatJstClock(new Date(lap.timestamp))" />
+          <TabularDigits :text="formatJstClock(new Date(lap.timestamp)).replace(/\.\d{2}$/, '')" />
         </span>
         <p class="order-1 text-base font-semibold sm:order-2 sm:text-lg" :class="durationClass">
           <TabularDigits :text="formatLapDuration(lap.lapDurationMs)" />

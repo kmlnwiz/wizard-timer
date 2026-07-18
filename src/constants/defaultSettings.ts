@@ -12,4 +12,4 @@ export const DEFAULT_SETTINGS: AppSettings = {
 export const LAP_COOLDOWN_MS = 3000
 
 /** 集計区分(1時間は固定、それ以外はこの配列 + オール) */
-export const STATS_RANGE_HOURS = [3, 5] as const
+export const STATS_RANGE_HOURS = [3] as const

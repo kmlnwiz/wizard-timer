@@ -5,7 +5,17 @@ import BaseModal from '@/components/ui/BaseModal.vue'
 import TabularDigits from '@/components/ui/TabularDigits.vue'
 import SummaryChart from './SummaryChart.vue'
 import { useSummary } from '@/composables/useSummary'
-import { formatHours, formatLapDuration, formatFileTimestamp } from '@/utils/time'
+import { formatHours, formatFileTimestamp } from '@/utils/time'
+import {
+  STATS_LABELS,
+  STATS_COLORS,
+  formatLapTime,
+  formatLapCount,
+  formatHourlySpeed,
+  formatAvgHourlySub,
+  formatMaxHourlySub,
+  formatTheoreticalHourlySub,
+} from '@/utils/statsDisplay'
 
 const { summary, hourlyLapCounts } = useSummary()
 
@@ -13,22 +23,6 @@ const captureEl = ref<HTMLElement | null>(null)
 const isRendering = ref(false)
 const previewUrl = ref<string | null>(null)
 const previewFileName = ref('')
-
-function formatPoints(v: number | null): string {
-  return v !== null ? `${Math.round(v).toLocaleString()}pt/h` : '--'
-}
-
-function formatLapCount(v: number | null): string {
-  return v !== null ? `(${Math.floor(v)}周)` : ''
-}
-
-/** 理論周回数を「N周とX秒」で表す。端数は最速ラップ換算の残り時間(秒)。 */
-function formatTheoreticalLapCount(count: number | null, fastestLapMs: number | null): string {
-  if (count === null || fastestLapMs === null) return ''
-  const laps = Math.floor(count)
-  const remainderSec = Math.round(((count - laps) * fastestLapMs) / 1000)
-  return `(${laps}周と${remainderSec}秒)`
-}
 
 async function openPreview(): Promise<void> {
   if (!captureEl.value || isRendering.value) return
@@ -69,51 +63,59 @@ function downloadPreview(): void {
     </div>
 
     <div ref="captureEl" class="space-y-4 py-2">
-      <dl class="grid grid-cols-2 gap-3 text-center sm:grid-cols-3">
+      <dl class="grid grid-cols-2 gap-3 text-center sm:grid-cols-4">
         <div>
-          <dt class="text-xs text-gray-400 dark:text-gray-500">合計時間</dt>
-          <dd class="text-base font-bold text-gray-900 dark:text-gray-100">
+          <dt class="text-xs text-gray-500 dark:text-gray-400">{{ STATS_LABELS.totalElapsed }}</dt>
+          <dd class="text-base font-bold" :class="STATS_COLORS.neutral">
             <TabularDigits :text="formatHours(summary.totalElapsedMs)" />
           </dd>
         </div>
         <div>
-          <dt class="text-xs text-gray-400 dark:text-gray-500">平均ラップ</dt>
-          <dd class="text-base font-bold text-gray-900 dark:text-gray-100">
-            <TabularDigits :text="summary.averageLapMs !== null ? formatLapDuration(summary.averageLapMs) : '--:--.--'" />
+          <dt class="text-xs text-gray-500 dark:text-gray-400">{{ STATS_LABELS.totalLapCount }}</dt>
+          <dd class="text-base font-bold" :class="STATS_COLORS.neutral">
+            <TabularDigits :text="formatLapCount(summary.totalLapCount)" />
           </dd>
         </div>
         <div>
-          <dt class="text-xs text-gray-400 dark:text-gray-500">最速 / 最遅</dt>
-          <dd class="whitespace-nowrap text-sm font-bold text-gray-900 dark:text-gray-100 sm:text-base">
-            <TabularDigits :text="summary.fastestLapMs !== null ? formatLapDuration(summary.fastestLapMs) : '--:--.--'" />
-            /
-            <TabularDigits :text="summary.slowestLapMs !== null ? formatLapDuration(summary.slowestLapMs) : '--:--.--'" />
+          <dt class="text-xs text-gray-500 dark:text-gray-400">{{ STATS_LABELS.averageLap }}</dt>
+          <dd class="text-base font-bold" :class="STATS_COLORS.neutral">
+            <TabularDigits :text="formatLapTime(summary.averageLapMs)" />
           </dd>
         </div>
         <div>
-          <dt class="text-xs text-gray-400 dark:text-gray-500">最高時速</dt>
-          <dd class="whitespace-nowrap text-base font-bold text-emerald-600 dark:text-emerald-400">
-            <TabularDigits :text="formatPoints(summary.maxPointsPerHour)" />
-            <span class="block text-xs font-normal text-gray-400 dark:text-gray-500">{{
-              formatLapCount(summary.maxPointsPerHourLapCount)
+          <dt class="text-xs text-gray-500 dark:text-gray-400">{{ STATS_LABELS.fastestLap }}</dt>
+          <dd class="text-base font-bold" :class="STATS_COLORS.fastest">
+            <TabularDigits :text="formatLapTime(summary.fastestLapMs)" />
+          </dd>
+        </div>
+        <div>
+          <dt class="text-xs text-gray-500 dark:text-gray-400">{{ STATS_LABELS.avgHourly }}</dt>
+          <dd class="whitespace-nowrap text-base font-bold" :class="STATS_COLORS.neutral">
+            <TabularDigits :text="formatHourlySpeed(summary.avgPointsPerHour, summary.avgPointsPerHourLapCount, 1)" />
+            <span class="block text-xs font-normal text-gray-500 dark:text-gray-400">{{
+              formatAvgHourlySub(summary.avgPointsPerHour, summary.avgPointsPerHourLapCount)
             }}</span>
           </dd>
         </div>
         <div>
-          <dt class="text-xs text-gray-400 dark:text-gray-500">平均時速</dt>
-          <dd class="whitespace-nowrap text-base font-bold text-indigo-600 dark:text-indigo-400">
-            <TabularDigits :text="formatPoints(summary.avgPointsPerHour)" />
-            <span class="block text-xs font-normal text-gray-400 dark:text-gray-500">{{
-              formatLapCount(summary.avgPointsPerHourLapCount)
+          <dt class="text-xs text-gray-500 dark:text-gray-400">{{ STATS_LABELS.maxHourly }}</dt>
+          <dd class="whitespace-nowrap text-base font-bold" :class="STATS_COLORS.maxHourly">
+            <TabularDigits :text="formatHourlySpeed(summary.maxPointsPerHour, summary.maxPointsPerHourLapCount)" />
+            <span class="block text-xs font-normal text-gray-500 dark:text-gray-400">{{
+              formatMaxHourlySub(
+                summary.maxPointsPerHour,
+                summary.maxPointsPerHourLapCount,
+                summary.maxPointsPerHourRecordCount,
+              )
             }}</span>
           </dd>
         </div>
         <div>
-          <dt class="text-xs text-gray-400 dark:text-gray-500">理論時速</dt>
-          <dd class="whitespace-nowrap text-base font-bold text-amber-600 dark:text-amber-400">
-            <TabularDigits :text="formatPoints(summary.theoreticalPointsPerHour)" />
-            <span class="block text-xs font-normal text-gray-400 dark:text-gray-500">{{
-              formatTheoreticalLapCount(summary.theoreticalLapCount, summary.fastestLapMs)
+          <dt class="text-xs text-gray-500 dark:text-gray-400">{{ STATS_LABELS.theoreticalHourly }}</dt>
+          <dd class="whitespace-nowrap text-base font-bold" :class="STATS_COLORS.theoretical">
+            <TabularDigits :text="formatHourlySpeed(summary.theoreticalPointsPerHour, summary.theoreticalLapCount)" />
+            <span class="block text-xs font-normal text-gray-500 dark:text-gray-400">{{
+              formatTheoreticalHourlySub(summary.theoreticalLapCount, summary.fastestLapMs)
             }}</span>
           </dd>
         </div>

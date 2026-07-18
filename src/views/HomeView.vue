@@ -34,6 +34,7 @@ const settingsOpen = ref(false)
           <StopwatchDisplay :current-lap-elapsed-ms="currentLapElapsedMs" :is-running="isRunning" />
           <StopwatchControls
             :is-running="isRunning"
+            :current-lap-elapsed-ms="currentLapElapsedMs"
             @toggle="toggle"
             @reset-elapsed="resetElapsed"
             @start-from-zero="startFromZero"

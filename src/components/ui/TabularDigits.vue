@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// Zen Maru Gothic は tabular-nums(tnum)を持たないWebフォントのため、
+// M PLUS Rounded 1c は tabular-nums(tnum)を持たないWebフォントのため、
 // CSSのfont-variant-numericでは数字幅を揃えられない。文字ごとに固定幅spanで描画して対応する。
 defineProps<{ text: string }>()
 </script>

@@ -5,7 +5,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['"Zen Maru Gothic"', 'sans-serif'],
+        sans: ['"M PLUS Rounded 1c"', 'sans-serif'],
       },
     },
   },

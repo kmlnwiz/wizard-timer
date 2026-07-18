@@ -26,6 +26,9 @@ function startListening(target: BindingTarget): void {
   listeningFor.value = target;
   const handler = (e: KeyboardEvent) => {
     e.preventDefault();
+    // キャプチャ段階で伝播を止め、グローバルのキーバインド(useKeyBindings)へ
+    // このキー入力が伝わって実際の挙動が発火するのを防ぐ
+    e.stopImmediatePropagation();
     window.removeEventListener("keydown", handler, true);
     setters[target](e.key);
     listeningFor.value = null;

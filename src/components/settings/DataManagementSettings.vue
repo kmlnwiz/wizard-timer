@@ -27,9 +27,15 @@ function confirmReset(): void {
     </div>
 
     <BaseModal :open="confirmOpen" title="全履歴をリセットしますか？" @close="confirmOpen = false">
-      <p class="mb-4 text-sm text-gray-600 dark:text-gray-300">
+      <p class="mb-3 text-sm text-gray-600 dark:text-gray-300">
         記録済みの全ラップ(オール集計を含む)が削除されます。この操作は取り消せません。
       </p>
+      <div class="mb-4 rounded-md bg-amber-50 p-3 text-sm text-amber-800 dark:bg-amber-900/30 dark:text-amber-200">
+        <p class="mb-2">
+          リセット前に、記録をCSVファイルとして保存しておくことをおすすめします。
+        </p>
+        <BaseButton variant="secondary" @click="downloadLapsCsv(laps)">CSVで保存する</BaseButton>
+      </div>
       <div class="flex justify-end gap-2">
         <BaseButton variant="ghost" @click="confirmOpen = false">キャンセル</BaseButton>
         <BaseButton variant="danger" @click="confirmReset">リセットする</BaseButton>

@@ -1,8 +1,20 @@
 import { ref, computed, readonly } from 'vue'
 import { LAP_COOLDOWN_MS } from '@/constants/defaultSettings'
+import { STORAGE_KEYS } from '@/constants/storageKeys'
+import { loadJson, saveJson } from './useLocalStorage'
 import { useLapHistory } from './useLapHistory'
 
 const TICK_MS = 50
+
+/** リロードをまたいで計測を継続するために保存する状態 */
+interface StopwatchPersisted {
+  isRunning: boolean
+  /** 計測開始の絶対時刻(epoch ms)。running時のみ意味を持つ */
+  startedAt: number
+  /** 停止中に保持している経過時間(ms) */
+  elapsedMs: number
+  lapBaselineMs: number
+}
 
 const isRunning = ref(false)
 const elapsedMs = ref(0)
@@ -12,6 +24,16 @@ const lapBaselineMs = ref(0)
 
 let startedAt = 0
 let intervalId: ReturnType<typeof setInterval> | null = null
+
+function persist(): void {
+  const state: StopwatchPersisted = {
+    isRunning: isRunning.value,
+    startedAt,
+    elapsedMs: elapsedMs.value,
+    lapBaselineMs: lapBaselineMs.value,
+  }
+  saveJson(STORAGE_KEYS.STOPWATCH, state)
+}
 
 function tick(): void {
   elapsedMs.value = Date.now() - startedAt
@@ -28,14 +50,31 @@ function stopInterval(): void {
   intervalId = null
 }
 
+// モジュール初期化時に保存済みの状態を復元する。
+// 計測中だった場合は、保存した絶対開始時刻から現在までの経過を再計算して継続する。
+;(function restore(): void {
+  const saved = loadJson<StopwatchPersisted | null>(STORAGE_KEYS.STOPWATCH, null)
+  if (!saved) return
+  lapBaselineMs.value = saved.lapBaselineMs
+  if (saved.isRunning) {
+    startedAt = saved.startedAt
+    elapsedMs.value = Date.now() - startedAt
+    isRunning.value = true
+    startInterval()
+  } else {
+    elapsedMs.value = saved.elapsedMs
+  }
+})()
+
 export function useStopwatch() {
-  const { addLap } = useLapHistory()
+  const { addLap, startNewSession } = useLapHistory()
 
   function start(): void {
     if (isRunning.value) return
     startedAt = Date.now() - elapsedMs.value
     isRunning.value = true
     startInterval()
+    persist()
   }
 
   /** iPhoneのストップウォッチの「停止」と同じ挙動。経過時間を保持したまま計測を止める */
@@ -44,6 +83,7 @@ export function useStopwatch() {
     tick()
     stopInterval()
     isRunning.value = false
+    persist()
   }
 
   function toggle(): void {
@@ -58,15 +98,19 @@ export function useStopwatch() {
   function resetElapsed(): void {
     if (isRunning.value) tick()
     lapBaselineMs.value = elapsedMs.value
+    persist()
   }
 
   /** 経過時間・現在ラップともに0にリセットしてから計測を開始する */
   function startFromZero(): void {
     elapsedMs.value = 0
     lapBaselineMs.value = 0
+    lastLapAt.value = null
+    startNewSession()
     startedAt = Date.now()
     isRunning.value = true
     startInterval()
+    persist()
   }
 
   /**
@@ -75,6 +119,7 @@ export function useStopwatch() {
    */
   function absorbIntoCurrentLap(ms: number): void {
     lapBaselineMs.value -= ms
+    persist()
   }
 
   const canLap = computed(() => {
@@ -91,6 +136,7 @@ export function useStopwatch() {
     addLap(elapsedMs.value)
     lapBaselineMs.value = elapsedMs.value
     lastLapAt.value = Date.now()
+    persist()
   }
 
   const currentLapElapsedMs = computed(() => elapsedMs.value - lapBaselineMs.value)

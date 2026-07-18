@@ -11,7 +11,8 @@ export function useMondayCountdown() {
     return Math.max(0, target - nowMs.value)
   })
 
-  const formatted = computed(() => formatDurationHHHMMSScc(remainingMs.value))
+  // 秒までの表示にする(末尾のセンチ秒 .cc を除去)
+  const formatted = computed(() => formatDurationHHHMMSScc(remainingMs.value).replace(/\.\d{2}$/, ''))
 
   return { remainingMs, formatted }
 }

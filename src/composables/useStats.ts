@@ -30,11 +30,24 @@ function computeStats(
 ): StatsResult {
   const inRange = filterLapsInRange(laps, hours, now)
 
-  const averageLapMs = inRange.length
-    ? inRange.reduce((sum, l) => sum + l.lapDurationMs, 0) / inRange.length
-    : null
-  const fastestLapMs = inRange.length ? Math.min(...inRange.map((l) => l.lapDurationMs)) : null
-  const slowestLapMs = inRange.length ? Math.max(...inRange.map((l) => l.lapDurationMs)) : null
+  // ラップが数千件規模でも重くならないよう、平均・最速・最遅を1回の走査で求める。
+  // Math.min(...array) のスプレッドは大配列で低速・スタック溢れの恐れがあるため使わない。
+  let averageLapMs: number | null = null
+  let fastestLapMs: number | null = null
+  let slowestLapMs: number | null = null
+  if (inRange.length) {
+    let sum = 0
+    let min = Infinity
+    let max = -Infinity
+    for (const l of inRange) {
+      sum += l.lapDurationMs
+      if (l.lapDurationMs < min) min = l.lapDurationMs
+      if (l.lapDurationMs > max) max = l.lapDurationMs
+    }
+    averageLapMs = sum / inRange.length
+    fastestLapMs = min
+    slowestLapMs = max
+  }
 
   const currentSlotStart = getCurrentClock55SlotStart(now)
   const periodStartMs = hours === 'all' ? null : currentSlotStart - (hours - 1) * HOUR_MS

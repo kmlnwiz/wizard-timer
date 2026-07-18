@@ -1,8 +1,14 @@
 <script setup lang="ts">
+import { computed } from "vue";
 import BaseButton from "@/components/ui/BaseButton.vue";
 
-defineProps<{ isRunning: boolean }>();
+const props = defineProps<{ isRunning: boolean; currentLapElapsedMs: number }>();
 const emit = defineEmits<{ toggle: []; resetElapsed: []; startFromZero: [] }>();
+
+// 停止中でも経過秒数が残っている場合は「開始」ではなく「再開」と表示する
+const toggleLabel = computed(() =>
+  props.isRunning ? "停止" : props.currentLapElapsedMs > 0 ? "再開" : "開始",
+);
 </script>
 
 <template>
@@ -11,16 +17,16 @@ const emit = defineEmits<{ toggle: []; resetElapsed: []; startFromZero: [] }>();
       :variant="isRunning ? 'secondary' : 'primary'"
       @click="emit('toggle')"
     >
-      {{ isRunning ? "停止" : "開始" }}
+      {{ toggleLabel }}
     </BaseButton>
     <BaseButton
       v-if="!isRunning"
       variant="secondary"
       @click="emit('startFromZero')"
-      >0秒から</BaseButton
+      >0秒からスタート</BaseButton
     >
     <BaseButton variant="ghost" @click="emit('resetElapsed')"
-      >リセット</BaseButton
+      >秒数リセット</BaseButton
     >
   </div>
 </template>

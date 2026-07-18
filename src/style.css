@@ -6,7 +6,7 @@
 
 @layer base {
   html {
-    font-family: 'Zen Maru Gothic', sans-serif;
+    font-family: 'M PLUS Rounded 1c', sans-serif;
     /* 連打時のダブルタップズームを防ぐ(ピンチズームは残す) */
     touch-action: manipulation;
   }
