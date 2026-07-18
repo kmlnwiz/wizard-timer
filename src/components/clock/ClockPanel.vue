@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { formatJstClock, formatDurationDHMS } from '@/utils/time'
+import { formatJstClock, formatDurationHHMMSScc } from '@/utils/time'
 import { getCurrentEventStart } from '@/utils/date'
 import { useClock } from '@/composables/useClock'
 import { useMondayCountdown } from '@/composables/useMondayCountdown'
@@ -11,8 +11,12 @@ const { formatted: mondayCountdown } = useMondayCountdown()
 
 // 秒までの表示にする(末尾のセンチ秒 .cc を除去)
 const clockText = computed(() => formatJstClock(new Date(nowMs.value)).replace(/\.\d{2}$/, ''))
+// 秒までの表示にする(末尾のセンチ秒 .cc を除去)
 const elapsedText = computed(() =>
-  formatDurationDHMS(nowMs.value - getCurrentEventStart(new Date(nowMs.value))),
+  formatDurationHHMMSScc(nowMs.value - getCurrentEventStart(new Date(nowMs.value))).replace(
+    /\.\d{2}$/,
+    '',
+  ),
 )
 </script>
 

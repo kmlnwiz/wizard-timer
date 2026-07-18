@@ -1,6 +1,6 @@
 import { computed } from 'vue'
 import { getNextMonday16 } from '@/utils/date'
-import { formatDurationHHHMMSScc } from '@/utils/time'
+import { formatDurationHHMMSScc } from '@/utils/time'
 import { useClock } from './useClock'
 
 export function useMondayCountdown() {
@@ -12,7 +12,7 @@ export function useMondayCountdown() {
   })
 
   // 秒までの表示にする(末尾のセンチ秒 .cc を除去)
-  const formatted = computed(() => formatDurationHHHMMSScc(remainingMs.value).replace(/\.\d{2}$/, ''))
+  const formatted = computed(() => formatDurationHHMMSScc(remainingMs.value).replace(/\.\d{2}$/, ''))
 
   return { remainingMs, formatted }
 }

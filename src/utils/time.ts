@@ -48,7 +48,7 @@ export function formatDurationDHMS(ms: number): string {
 }
 
 /** ms を HH:MM:SS.cc 形式(2桁時間・1/100秒まで)に整形する */
-export function formatDurationHHHMMSScc(ms: number): string {
+export function formatDurationHHMMSScc(ms: number): string {
   const totalCentiSeconds = Math.floor(ms / 10)
   const centiSeconds = totalCentiSeconds % 100
   const totalSeconds = Math.floor(totalCentiSeconds / 100)
