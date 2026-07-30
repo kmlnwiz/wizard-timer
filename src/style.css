@@ -7,14 +7,40 @@
 @layer base {
   html {
     font-family: 'M PLUS Rounded 1c', sans-serif;
-    /* 連打時のダブルタップズームを防ぐ(ピンチズームは残す) */
+  }
+
+  /* ダブルタップズームを防ぐ(ピンチズームは残す)
+     touch-action は継承されないため全要素に指定する */
+  *,
+  *::before,
+  *::after {
     touch-action: manipulation;
   }
 
-  /* 連打でテキスト選択・選択メニューが出るのを防ぐ */
-  button {
+  /* 全面でテキスト選択・コピー・長押しメニューを禁止 */
+  html,
+  body {
     -webkit-user-select: none;
+    -webkit-touch-callout: none;
     user-select: none;
     -webkit-tap-highlight-color: transparent;
+  }
+
+  /* 入力系(フォーム)と .selectable を付けた要素のみ選択を許可 */
+  input,
+  textarea,
+  select,
+  [contenteditable='true'],
+  [contenteditable=''],
+  .selectable {
+    -webkit-user-select: text;
+    -webkit-touch-callout: default;
+    user-select: text;
+  }
+
+  /* 画像のドラッグ保存・ドラッグ移動を防ぐ */
+  img {
+    -webkit-user-drag: none;
+    user-drag: none;
   }
 }

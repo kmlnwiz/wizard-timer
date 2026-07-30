@@ -15,6 +15,7 @@ const toggleLabel = computed(() =>
   <div class="flex flex-wrap justify-center gap-2">
     <BaseButton
       :variant="isRunning ? 'secondary' : 'primary'"
+      class="py-6"
       @click="emit('toggle')"
     >
       {{ toggleLabel }}
@@ -22,10 +23,11 @@ const toggleLabel = computed(() =>
     <BaseButton
       v-if="!isRunning"
       variant="secondary"
+      class="py-6"
       @click="emit('startFromZero')"
       >0秒からスタート</BaseButton
     >
-    <BaseButton variant="ghost" @click="emit('resetElapsed')"
+    <BaseButton variant="ghost" class="py-6" @click="emit('resetElapsed')"
       >秒数リセット</BaseButton
     >
   </div>

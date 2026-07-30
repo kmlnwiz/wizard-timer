@@ -29,7 +29,8 @@ const variantClasses: Record<string, string> = {
     :disabled="disabled"
     :class="[
       'inline-flex h-10 min-w-[4.5rem] items-center justify-center whitespace-nowrap rounded-md px-3 text-sm font-medium transition-colors disabled:cursor-not-allowed sm:min-w-[6rem] sm:px-4',
-      variantClasses[variant],
+      variantClasses[variant]
+
     ]"
     @click="$emit('click', $event)"
   >
