@@ -33,9 +33,47 @@ const props = defineProps<{ series: HourlyLapCount[] }>()
 const canvasEl = ref<HTMLCanvasElement | null>(null)
 let chart: Chart | null = null
 
+/** 縦線を引く区切り位置(その直前のラベルとの間に線を描く) */
+const BOUNDARY_MARKERS = [
+  // 日付の変わり目(23:55枠と00:55枠の間)
+  { label: '00:55', color: 'rgba(148, 163, 184, 0.9)', lineWidth: 1 },
+  // イベントの日区切り(15:55枠と16:55枠の間 = 16:00)
+  { label: '16:55', color: 'rgba(239, 68, 68, 0.9)', lineWidth: 1 },
+]
+
+/** 日付・イベント日の区切り位置に縦線を描くプラグイン */
+const boundaryLinePlugin = {
+  id: 'boundaryLine',
+  afterDatasetsDraw(c: Chart): void {
+    const labels = c.data.labels as string[] | undefined
+    const xScale = c.scales.x
+    if (!labels || !xScale) return
+
+    const { ctx, chartArea } = c
+    ctx.save()
+    ctx.setLineDash([4, 4])
+
+    for (let i = 1; i < labels.length; i++) {
+      const marker = BOUNDARY_MARKERS.find((m) => m.label === labels[i])
+      if (!marker) continue
+      // カテゴリ軸のため、前後の棒の中心の中間を境界位置とする
+      const x = (xScale.getPixelForValue(i - 1) + xScale.getPixelForValue(i)) / 2
+      ctx.strokeStyle = marker.color
+      ctx.lineWidth = marker.lineWidth
+      ctx.beginPath()
+      ctx.moveTo(x, chartArea.top)
+      ctx.lineTo(x, chartArea.bottom)
+      ctx.stroke()
+    }
+
+    ctx.restore()
+  },
+}
+
 function buildChart(): void {
   if (!canvasEl.value) return
   chart = new Chart(canvasEl.value, {
+    plugins: [boundaryLinePlugin],
     data: {
       labels: props.series.map((s) => s.hourLabel),
       datasets: [
