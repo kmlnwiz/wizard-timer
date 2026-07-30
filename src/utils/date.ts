@@ -62,20 +62,29 @@ export function getCurrentEventStart(now: Date): number {
   return getMostRecentFriday16(now)
 }
 
+/** epoch ms を JST の「HH:MM」表記にする */
+function formatJstHourMinute(ms: number): string {
+  const { hour, minute } = getJstParts(new Date(ms))
+  return `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`
+}
+
 /**
  * イベント開始(金曜16:00)を起点に、NN:55〜次の55分までの枠で72区分を生成する。
  * 最初の区分のみ「金曜16:00〜16:55」の55分、以降は「H:55〜(H+1):55」の60分区切りで、
  * 最終区分は「月曜14:55〜15:55」となる。
+ * ラベルは枠の終了時刻(集計が締まる時刻)を表す。
+ * 例: 16:00〜16:55 → 「16:55」、20:55〜21:55 → 「21:55」、最終枠 → 「15:55」。
  */
 export function getEventHourSlots(eventStartMs: number): EventHourSlot[] {
   const firstBoundary = eventStartMs + 55 * 60 * 1000
-  const slots: EventHourSlot[] = [{ startMs: eventStartMs, endMs: firstBoundary, label: '16:00' }]
+  const slots: EventHourSlot[] = [
+    { startMs: eventStartMs, endMs: firstBoundary, label: formatJstHourMinute(firstBoundary) },
+  ]
 
   for (let i = 0; i < 71; i++) {
     const startMs = firstBoundary + i * HOUR_MS
     const endMs = startMs + HOUR_MS
-    const { hour, minute } = getJstParts(new Date(startMs))
-    slots.push({ startMs, endMs, label: `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}` })
+    slots.push({ startMs, endMs, label: formatJstHourMinute(endMs) })
   }
 
   return slots
