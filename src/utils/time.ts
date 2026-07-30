@@ -27,9 +27,12 @@ export function formatLapDuration(ms: number): string {
   return `${minutes}:${pad(seconds)}.${pad(centiSeconds)}`
 }
 
-/** ms を「N.N時間」形式(ラップ合計時間の表示用)に整形する */
-export function formatHours(ms: number): string {
-  return `${(ms / (60 * 60 * 1000)).toFixed(1)}時間`
+/** ms を「N時間N分」形式(ラップ合計時間の表示用)に整形する。1時間未満は「N分」 */
+export function formatHoursMinutes(ms: number): string {
+  const totalMinutes = Math.floor(ms / (60 * 1000))
+  const hours = Math.floor(totalMinutes / 60)
+  const minutes = totalMinutes % 60
+  return hours > 0 ? `${hours}時間${minutes}分` : `${minutes}分`
 }
 
 /** ms を D日 HH:MM:SS 形式(カウントダウン表示用)に整形する */

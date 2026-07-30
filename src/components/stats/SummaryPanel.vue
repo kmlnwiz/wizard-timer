@@ -5,7 +5,7 @@ import BaseModal from '@/components/ui/BaseModal.vue'
 import TabularDigits from '@/components/ui/TabularDigits.vue'
 import SummaryChart from './SummaryChart.vue'
 import { useSummary } from '@/composables/useSummary'
-import { formatHours, formatFileTimestamp } from '@/utils/time'
+import { formatHoursMinutes, formatFileTimestamp } from '@/utils/time'
 import {
   STATS_LABELS,
   STATS_COLORS,
@@ -67,7 +67,7 @@ function downloadPreview(): void {
         <div>
           <dt class="text-xs text-gray-500 dark:text-gray-400">{{ STATS_LABELS.totalElapsed }}</dt>
           <dd class="text-base font-bold" :class="STATS_COLORS.neutral">
-            <TabularDigits :text="formatHours(summary.totalElapsedMs)" />
+            <TabularDigits :text="formatHoursMinutes(summary.totalElapsedMs)" />
           </dd>
         </div>
         <div>
