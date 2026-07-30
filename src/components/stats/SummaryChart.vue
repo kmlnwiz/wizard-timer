@@ -66,7 +66,7 @@ function buildChart(): void {
       maintainAspectRatio: false,
       animation: false,
       scales: {
-        x: { title: { display: true, text: '開始時刻(JST)' } },
+        x: { title: { display: true, text: '時刻(JST)' } },
         y: {
           position: 'left',
           title: { display: true, text: '周回数' },
